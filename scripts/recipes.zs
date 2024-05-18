@@ -1,3 +1,4 @@
+#reloadable
 // OLD IMPORTS
 import crafttweaker.data.IData;
 import crafttweaker.enchantments.IEnchantmentDefinition;
@@ -17,7 +18,7 @@ recipes.addShapeless("mapEnch", <minecraft:diamond_sword>.withTag(mapSword),
 );
 
 // ---- NEW WAY ----
-var enclistSwordWrapped as int[ResourceLocation] = {
+var enclistSwordWrapped as int[ResourceLocation]$orderly = {
   ResourceLocation.create("minecraft:sharpness"): 5,
   ResourceLocation.create("cofhcore:vorpal"): 10,
 };
@@ -33,7 +34,7 @@ recipes.addShapeless("wrapperEnch",
   [<minecraft:chest>, <minecraft:diamond>]
 );
 
-var enclistMantleWrapped as int[ResourceLocation] = {
+var enclistMantleWrapped as int[ResourceLocation]$orderly = {
   ResourceLocation.create("minecraft:protection"): 10,
   ResourceLocation.create("minecraft:fire_protection"): 10,
   ResourceLocation.create("openblocks:last_stand"): 30,

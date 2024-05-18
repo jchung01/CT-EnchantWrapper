@@ -4,7 +4,7 @@
 import crafttweaker.data.IData;
 import crafttweaker.item.IItemStack;
 import mods.contenttweaker.ResourceLocation;
-import mods.zenutils.DataUpdateOperation.MERGE;
+import mods.zenutils.DataUpdateOperation.APPEND;
 
 /**
   Makes a wrapper item for enchanted items. 
@@ -33,9 +33,12 @@ import mods.zenutils.DataUpdateOperation.MERGE;
 function unwrap(item as IItemStack) as IItemStack {
   var out as IItemStack = <item:${item.tag.id}>.withDamage(item.damage);
   var enchList = {} as IData;
-  // Convert delayed enchants to actual enchants
-  for name, level in item.tag.delayedEnch.asMap() {
-    enchList += <enchantment:${name}>.makeEnchantment(level).makeTag();
+  // Convert delayed enchants to actual enchants.
+  for enchant in item.tag.delayedEnch.asList() {
+    // A singleton map of the enchant.
+    for name, level in enchant.asMap() {
+      enchList += <enchantment:${name}>.makeEnchantment(level).makeTag();
+    }
   }
   out = out.withTag(item.tag.tag + enchList);
   return out;
@@ -101,7 +104,7 @@ zenClass SuperEnchantedItem {
       }
     } as IData;
     for name, level in enchants {
-      enchantTags = enchantTags.deepUpdate(this.writeTag(name, level), MERGE);
+      enchantTags = enchantTags.deepUpdate(this.writeTag(name, level), APPEND);
     }
     return enchantTags;
   }
@@ -109,9 +112,9 @@ zenClass SuperEnchantedItem {
   // Writes tag for a single enchant.
   function writeTag(loc as ResourceLocation, level as int) as IData {
     val enchantTag = {
-      "delayedEnch": {
+      "delayedEnch": [{
         `${loc.domain}:${loc.path}`: level
-      }
+      }]
     } as IData;
     return enchantTag;
   }
