@@ -8,7 +8,7 @@ import mods.zenutils.DataUpdateOperation.APPEND;
 import mods.zenutils.StaticString;
 
 /**
-  Makes a wrapper item for enchanted items. 
+  This script makes a wrapper item for enchanted items. 
   This fixes a problem with existing worlds where new enchants being added/removed
   would cause CT recipes that output enchanted items to have the wrong enchants
   due to a shift in enchantment ids that CT cannot account for.
@@ -46,7 +46,7 @@ function unwrap(item as IItemStack) as IItemStack {
 }
 
 /**
-  Holds a map of (ResourceLocation name, int level) entries with
+  Holds a map of (ResourceLocation name, int level) enchantment entries with
   predictable iteration order (insertion order).
 **/
 zenClass EnchantMap {
@@ -81,13 +81,12 @@ zenClass SuperEnchantedItem {
   /**
     Constructor to make the superenchant_wrapper item and write its necessary data
     to NBT. To get the resultant wrapper IItemStack, call:
-    `SuperEnchantedItem(IItemStack item, int[ResourceLocation] enchants).wrapperItem`
+    `SuperEnchantedItem(IItemStack item, EnchantMap enchants).getItem()`
     
     item is the IItemStack to be superenchanted, possibly with any metadata/NBT.
     
-    enchants expects a map of ResourceLocation -> int,
-    where the ResourceLocation is the enchantment id (e.g. ResourceLocation.create("minecraft:sharpness"))
-    and the int is the level of the enchantment.
+    enchants expects a populated EnchantMap object. To make the object, call:
+    `EnchantMap().add(name1, level1).add(name2, level2)...`
   **/
   zenConstructor(item as IItemStack, enchants as EnchantMap) {
     this.mapNBT = {} as IData;
