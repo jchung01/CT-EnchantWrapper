@@ -4,6 +4,7 @@ import crafttweaker.data.IData;
 import crafttweaker.enchantments.IEnchantmentDefinition;
 // NEW IMPORTS
 import mods.contenttweaker.ResourceLocation;
+import scripts.EnchantWrapper.EnchantMap;
 import scripts.EnchantWrapper.SuperEnchantedItem;
 
 // ---- OLD WAY ----
@@ -18,10 +19,9 @@ recipes.addShapeless("mapEnch", <minecraft:diamond_sword>.withTag(mapSword),
 );
 
 // ---- NEW WAY ----
-var enclistSwordWrapped as int[ResourceLocation]$orderly = {
-  ResourceLocation.create("minecraft:sharpness"): 5,
-  ResourceLocation.create("cofhcore:vorpal"): 10,
-};
+val enclistSwordWrapped as EnchantMap = EnchantMap()
+  .add("minecraft:sharpness", 5)
+  .add("cofhcore:vorpal", 10);
 
 // Wrapper method, id does not shift
 recipes.addShapeless("wrapperEnch", 
@@ -30,26 +30,26 @@ recipes.addShapeless("wrapperEnch",
       {display: {Name:"§6§oDiamond Sword§r",Lore:["§d§oSuper-Enchanted§r"]}}
     ),
     enclistSwordWrapped
-  ).wrapperItem, // Make sure to get the wrapperItem IItemStack!
+  ).getItem(), // Make sure to get the IItemStack!
   [<minecraft:chest>, <minecraft:diamond>]
 );
 
-var enclistMantleWrapped as int[ResourceLocation]$orderly = {
-  ResourceLocation.create("minecraft:protection"): 10,
-  ResourceLocation.create("minecraft:fire_protection"): 10,
-  ResourceLocation.create("openblocks:last_stand"): 30,
-  ResourceLocation.create("minecraft:unbreaking"): 100,
-  ResourceLocation.create("minecraft:mending"): 1,
-  ResourceLocation.create("minecraft:blast_protection"): 10,
-  ResourceLocation.create("minecraft:projectile_protection"): 10,
-};
+val enclistMantleWrapped as EnchantMap = EnchantMap()
+  .add("minecraft:protection", 10)
+  .add("minecraft:fire_protection", 10)
+  .add("openblocks:last_stand", 30)
+  .add("minecraft:unbreaking", 100)
+  .add("minecraft:mending", 1)
+  .add("minecraft:blast_protection", 10)
+  .add("minecraft:projectile_protection", 10);
+  
 mods.extendedcrafting.TableCrafting.addShaped(
   SuperEnchantedItem(
     <astralsorcery:itemcape>.withTag(
       {RepairCost: 1, astralsorcery: {constellationName: "astralsorcery.constellation.armara"}}
     ),
     enclistMantleWrapped
-  ).wrapperItem,
+  ).getItem(),
   [[<minecraft:diamond_helmet>, <minecraft:book>, null, null, null, null, null], 
    [null, null, null, null, null, null, null], 
    [null, null, null, null, null, null, null], 

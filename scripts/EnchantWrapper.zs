@@ -5,6 +5,7 @@ import crafttweaker.data.IData;
 import crafttweaker.item.IItemStack;
 import mods.contenttweaker.ResourceLocation;
 import mods.zenutils.DataUpdateOperation.APPEND;
+import mods.zenutils.StaticString;
 
 /**
   Makes a wrapper item for enchanted items. 
@@ -44,9 +45,35 @@ function unwrap(item as IItemStack) as IItemStack {
   return out;
 }
 
-zenClass SuperEnchantedItem {
-  // The wrapper item.
-  val wrapperItem as IItemStack;
+/**
+  Holds a map of (ResourceLocation name, int level) entries with
+  predictable iteration order (insertion order).
+**/
+zenClass EnchantMap {
+  val enchants as int[ResourceLocation];
+  
+  zenConstructor() {
+    enchants = {} as int[ResourceLocation]$orderly;
+  }
+  
+  function add(name as string, level as int) as EnchantMap {
+    if (StaticString.countMatches(name, ':') != 1) {
+      print("EnchantWrapper.EnchantMap.zs - Add to map failed! name: " + name + " level:" + level);
+    }
+    else {
+      enchants[ResourceLocation.create(name)] = level;
+    }
+    return this;
+  }
+  
+  function getMap() as int[ResourceLocation] {
+    return this.enchants;
+  }
+}
+
+zenClass SuperEnchantedItem {  
+  // The wrapperItem.
+  var wrapperItem as IItemStack;
   
   // The NBT to write to the wrapper.
   var mapNBT as IData;
@@ -62,10 +89,9 @@ zenClass SuperEnchantedItem {
     where the ResourceLocation is the enchantment id (e.g. ResourceLocation.create("minecraft:sharpness"))
     and the int is the level of the enchantment.
   **/
-  zenConstructor(item as IItemStack, enchants as int[ResourceLocation]) {
+  zenConstructor(item as IItemStack, enchants as EnchantMap) {
     this.mapNBT = {} as IData;
-    writeItemData(item, enchants);
-    writeDisplayData();
+    writeItemData(item, enchants.getMap());
     this.wrapperItem = <contenttweaker:superenchant_wrapper>.withTag(this.mapNBT);
   }
   
@@ -85,16 +111,7 @@ zenClass SuperEnchantedItem {
       } as IData;
     }
     this.mapNBT += writeDelayedEnchants(enchants);
-  }
-  
-  // Writes the name/tooltip to display on the wrapper item.
-  function writeDisplayData() {
-    this.mapNBT += {
-      "display": {
-        "Lore": ["line1", "line2"],
-        "Name": "test"
-      }
-    } as IData;
+    writeDisplayData();
   }
   
   // Write enchants to "delayedEnch" tag.
@@ -117,5 +134,19 @@ zenClass SuperEnchantedItem {
       }]
     } as IData;
     return enchantTag;
+  }
+  
+  // Writes the name/tooltip to display on the wrapper item.
+  function writeDisplayData() {
+    this.mapNBT += {
+      "display": {
+        "Lore": ["line1", "line2"],
+        "Name": "test"
+      }
+    } as IData;
+  }
+  
+  function getItem() as IItemStack {
+    return this.wrapperItem;
   }
 }
