@@ -5,7 +5,8 @@ import crafttweaker.data.IData;
 import crafttweaker.item.IItemStack;
 import mods.contenttweaker.ResourceLocation;
 import mods.zenutils.DataUpdateOperation.APPEND;
-import mods.zenutils.StaticString;
+import scripts.EnchantUtil;
+import scripts.EnchantUtil.EnchantMap;
 
 /**
   This script makes a wrapper item for enchanted items. 
@@ -14,17 +15,21 @@ import mods.zenutils.StaticString;
   due to a shift in enchantment ids that CT cannot account for.
 **/
 
+/**
+  Controls the actual conversion of the wrapper item to the enchanted item on right click.
+**/
 <cotItem:superenchant_wrapper>.itemRightClick = function(stack, world, player, hand) {
   if (world.isRemote()) {
     return "FAIL"; 
   }
-  if (stack.definition.id != "contenttweaker:superenchant_wrapper" || !stack.hasTag) {
-    return "FAIL"; 
+  val result as IItemStack = unwrap(stack);
+  if (isNull(result)) {
+    return "FAIL";
   }
   if (!player.creative) {
     stack.shrink(1);
   }
-  player.give(unwrap(stack));
+  player.give(result);
   return "SUCCESS";
 };
 
@@ -32,43 +37,20 @@ import mods.zenutils.StaticString;
   From a superenchant_wrapper item, return the actual superenchanted item.
 **/
 function unwrap(item as IItemStack) as IItemStack {
+  if (item.definition.id != "contenttweaker:superenchant_wrapper" || !item.hasTag) {
+    return null; 
+  }
   var out as IItemStack = <item:${item.tag.id}>.withDamage(item.damage);
   var enchList = {} as IData;
   // Convert delayed enchants to actual enchants.
   for enchant in item.tag.delayedEnch.asList() {
     // A singleton map of the enchant.
     for name, level in enchant.asMap() {
-      enchList += <enchantment:${name}>.makeEnchantment(level).makeTag();
+      enchList += EnchantUtil.makeIntTag(<enchantment:${name}>.makeEnchantment(level));
     }
   }
   out = out.withTag(item.tag.tag + enchList);
   return out;
-}
-
-/**
-  Holds a map of (ResourceLocation name, int level) enchantment entries with
-  predictable iteration order (insertion order).
-**/
-zenClass EnchantMap {
-  val enchants as int[ResourceLocation];
-  
-  zenConstructor() {
-    enchants = {} as int[ResourceLocation]$orderly;
-  }
-  
-  function add(name as string, level as int) as EnchantMap {
-    if (StaticString.countMatches(name, ':') != 1) {
-      print("EnchantWrapper.EnchantMap.zs - Add to map failed! name: " + name + " level:" + level);
-    }
-    else {
-      enchants[ResourceLocation.create(name)] = level;
-    }
-    return this;
-  }
-  
-  function getMap() as int[ResourceLocation] {
-    return this.enchants;
-  }
 }
 
 zenClass SuperEnchantedItem {  
@@ -85,8 +67,7 @@ zenClass SuperEnchantedItem {
     
     item is the IItemStack to be superenchanted, possibly with any metadata/NBT.
     
-    enchants expects a populated EnchantMap object. To make the object, call:
-    `EnchantMap().add(name1, level1).add(name2, level2)...`
+    enchants expects a populated EnchantMap object.
   **/
   zenConstructor(item as IItemStack, enchants as EnchantMap) {
     this.mapNBT = {} as IData;

@@ -3,8 +3,7 @@
 import crafttweaker.data.IData;
 import crafttweaker.enchantments.IEnchantmentDefinition;
 // NEW IMPORTS
-import mods.contenttweaker.ResourceLocation;
-import scripts.EnchantWrapper.EnchantMap;
+import scripts.EnchantUtil.EnchantMap;
 import scripts.EnchantWrapper.SuperEnchantedItem;
 
 // ---- OLD WAY ----
