@@ -1,4 +1,6 @@
+#priority 2
 #reloadable
+
 // OLD IMPORTS
 import crafttweaker.data.IData;
 import crafttweaker.enchantments.IEnchantmentDefinition;

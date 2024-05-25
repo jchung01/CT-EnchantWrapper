@@ -1,12 +1,15 @@
 #modloaded contenttweaker zenutils
 #loader crafttweaker
+#priority 3
 #reloadable
+
 import crafttweaker.data.IData;
 import crafttweaker.item.IItemStack;
 import mods.contenttweaker.ResourceLocation;
 import mods.zenutils.DataUpdateOperation.APPEND;
 import scripts.EnchantUtil;
 import scripts.EnchantUtil.EnchantMap;
+import scripts.EnchantUtil.WrapperMap;
 
 /**
   This script makes a wrapper item for enchanted items. 
@@ -22,7 +25,7 @@ import scripts.EnchantUtil.EnchantMap;
   if (world.isRemote()) {
     return "FAIL"; 
   }
-  val result as IItemStack = unwrap(stack);
+  val result as IItemStack = EnchantUtil.unwrap(stack);
   if (isNull(result)) {
     return "FAIL";
   }
@@ -32,26 +35,6 @@ import scripts.EnchantUtil.EnchantMap;
   player.give(result);
   return "SUCCESS";
 };
-
-/**
-  From a superenchant_wrapper item, return the actual superenchanted item.
-**/
-function unwrap(item as IItemStack) as IItemStack {
-  if (item.definition.id != "contenttweaker:superenchant_wrapper" || !item.hasTag) {
-    return null; 
-  }
-  var out as IItemStack = <item:${item.tag.id}>.withDamage(item.damage);
-  var enchList = {} as IData;
-  // Convert delayed enchants to actual enchants.
-  for enchant in item.tag.delayedEnch.asList() {
-    // A singleton map of the enchant.
-    for name, level in enchant.asMap() {
-      enchList += EnchantUtil.makeIntTag(<enchantment:${name}>.makeEnchantment(level));
-    }
-  }
-  out = out.withTag(item.tag.tag + enchList);
-  return out;
-}
 
 zenClass SuperEnchantedItem {  
   // The wrapperItem.
@@ -73,6 +56,7 @@ zenClass SuperEnchantedItem {
     this.mapNBT = {} as IData;
     writeItemData(item, enchants.getMap());
     this.wrapperItem = <contenttweaker:superenchant_wrapper>.withTag(this.mapNBT);
+    WrapperMap.INSTANCE.add(this.getItem());
   }
   
   // Writes all necessary item data to wrapper's NBT.
