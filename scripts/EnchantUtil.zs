@@ -44,35 +44,34 @@ function unwrap(item as IItemStack) as IItemStack {
   From a superenchant_wrapper item, return a representation of the superenchanted item.
   Because of how JEI loads, the NBT is dynamically transformed on tooltip hover.
 **/
-function unwrapJEI(item as IItemStack) as IItemStack {
-  if (item.definition.id != "contenttweaker:superenchant_wrapper" || !item.hasTag) {
+function unwrapJEI(wrapper as IItemStack) as IItemStack {
+  if (wrapper.definition.id != "contenttweaker:superenchant_wrapper" || !wrapper.hasTag) {
     return null; 
   }
-  var base as IItemStack = <item:${item.tag.id}>.withDamage(item.damage);
-  // Add a dummy enchant for the glow, removed in transformer.
-  val dummyEnch = <enchantment:minecraft:unbreaking>.makeEnchantment(1).makeTag();
-  // Build NBT
-  val delayedEnch = {
-    delayedEnch: item.tag.delayedEnch
+  var base as IItemStack = <item:${wrapper.tag.id}>.withDamage(wrapper.damage);
+  val dummyTags = {
+    ench: [{ // Add a dummy enchant for the glow, removed in transformer.
+      id: 0,
+      lvl: 1
+    }],
+    transformed: false
   } as IData;
-  base = base.withTag(item.tag.tag + delayedEnch + dummyEnch);
+  base = base.withTag(wrapper.tag.tag + dummyTags);
   // Setup item transformer to run later.
   val transformed = base.transformNew(function(item) {
     var enchList = {} as IData;
-    for enchant in item.tag.delayedEnch.asList() {
+    for enchant in wrapper.tag.delayedEnch.asList() {
       // A singleton map of the enchant.
       for name, level in enchant.asMap() {
         enchList += makeIntTag(<enchantment:${name}>.makeEnchantment(level));
       }
     }
-    return item.withTag(item.tag - dummyEnch - delayedEnch + enchList);
+    return item.withTag(item.tag - dummyTags + enchList);
   });
   // Late execute transformer on item hover.
   base.addAdvancedTooltip(function(item) {
-    if (item.hasTag && !isNull(item.tag.delayedEnch)) {
-      transformed.applyNewTransform(item);
-    }
-    return "";
+    transformed.applyNewTransform(item);
+    return null;
   });
   return base;
 }
@@ -107,26 +106,23 @@ zenClass EnchantMap {
 }
 
 /**
-  Singleton instance of a map that holds all registered superenchant_wrapper items.
+  Registry that holds all registered superenchant_wrapper items.
   For use in EnchantWrapper.SuperEnchantedItem.
 **/
-zenClass WrapperMap {
-  static INSTANCE = WrapperMap();
+zenClass WrapperRegistry {
+  static INSTANCE = WrapperRegistry();
   
-  val wrapperItems as IItemStack[int];
-  var index as int;
+  val wrapperItems as IItemStack[];
   
   zenConstructor() {
-    wrapperItems = {} as IItemStack[int];
-    index = 0;
+    wrapperItems = [] as IItemStack[];
   }
   
   function add(wrapper as IItemStack) {
-    wrapperItems[index] = wrapper;
-    index += 1;
+    wrapperItems += wrapper;
   }
   
-  function getMap() as IItemStack[int] {
+  function get() as IItemStack[] {
     return this.wrapperItems;
   }
 }

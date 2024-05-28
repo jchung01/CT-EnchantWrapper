@@ -9,7 +9,7 @@ import mods.contenttweaker.ResourceLocation;
 import mods.zenutils.DataUpdateOperation.APPEND;
 import scripts.EnchantUtil;
 import scripts.EnchantUtil.EnchantMap;
-import scripts.EnchantUtil.WrapperMap;
+import scripts.EnchantUtil.WrapperRegistry;
 
 /**
   This script makes a wrapper item for enchanted items. 
@@ -56,7 +56,7 @@ zenClass SuperEnchantedItem {
     this.mapNBT = {} as IData;
     writeItemData(item, enchants.getMap());
     this.wrapperItem = <contenttweaker:superenchant_wrapper>.withTag(this.mapNBT);
-    WrapperMap.INSTANCE.add(this.getItem());
+    WrapperRegistry.INSTANCE.add(this.getItem());
   }
   
   // Writes all necessary item data to wrapper's NBT.
