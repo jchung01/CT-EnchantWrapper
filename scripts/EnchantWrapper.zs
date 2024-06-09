@@ -7,6 +7,7 @@ import crafttweaker.data.IData;
 import crafttweaker.item.IItemStack;
 import mods.contenttweaker.ResourceLocation;
 import mods.zenutils.DataUpdateOperation.APPEND;
+import mods.zenutils.StaticString;
 import scripts.EnchantUtil;
 import scripts.EnchantUtil.EnchantMap;
 import scripts.EnchantUtil.WrapperRegistry;
@@ -54,8 +55,9 @@ zenClass SuperEnchantedItem {
   **/
   zenConstructor(item as IItemStack, enchants as EnchantMap) {
     this.mapNBT = {} as IData;
+    this.wrapperItem = <contenttweaker:superenchant_wrapper>;
     writeItemData(item, enchants.getMap());
-    this.wrapperItem = <contenttweaker:superenchant_wrapper>.withTag(this.mapNBT);
+    this.wrapperItem = this.wrapperItem.withTag(this.mapNBT);
     WrapperRegistry.INSTANCE.add(this.getItem());
   }
   
@@ -75,7 +77,7 @@ zenClass SuperEnchantedItem {
       } as IData;
     }
     this.mapNBT += writeDelayedEnchants(enchants);
-    writeDisplayData();
+    writeDisplayData(item);
   }
   
   // Write enchants to "delayedEnch" tag.
@@ -101,11 +103,22 @@ zenClass SuperEnchantedItem {
   }
   
   // Writes the name/tooltip to display on the wrapper item.
-  function writeDisplayData() {
+  function writeDisplayData(item as IItemStack) {
+    val displayedName = this.wrapperItem.displayName + " §r§f(" + item.displayName + ")";
+    var displayedEnchants = [] as string[];
+    for enchantEntry in this.mapNBT.delayedEnch.asList() {
+      for name, level in enchantEntry.asMap() {
+        val enchant = <enchantment:${name}>.makeEnchantment(level);
+        // Localization for level isn't loaded yet for some reason, let's just use the numeric level if needed.
+        displayedEnchants += "§r§7" + StaticString.remove(enchant.displayName, "enchantment.level.");
+      }
+    }
+    // Just use an IItemStack to easily store and copy lore.
+    val tempCopy = this.wrapperItem.withLore(displayedEnchants) as IItemStack;
     this.mapNBT += {
       "display": {
-        "Lore": ["line1", "line2"],
-        "Name": "test"
+        "Lore": tempCopy.tag.display.Lore,
+        "Name": displayedName
       }
     } as IData;
   }
