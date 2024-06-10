@@ -11,9 +11,13 @@ import mods.zenutils.StaticString;
   Same as IEnchantment#makeTag(), but uses int enchant id.
   Useful if you have JEID extending enchantment ids.
 **/
-function makeIntTag(enchant as IEnchantment) as IData {
+function makeIntTag(enchant as IEnchantment, isBook as bool) as IData {
+  var key = "ench";
+  if (isBook) {
+    key = "StoredEnchantments";
+  }
   return {
-    StoredEnchantments: [{
+    `${key}`: [{
       id: enchant.definition.id,
       lvl: enchant.level
     }]
@@ -33,7 +37,7 @@ function unwrap(item as IItemStack) as IItemStack {
   for enchant in item.tag.delayedEnch.asList() {
     // A singleton map of the enchant.
     for name, level in enchant.asMap() {
-      enchList += makeIntTag(<enchantment:${name}>.makeEnchantment(level));
+      enchList += makeIntTag(<enchantment:${name}>.makeEnchantment(level), false);
     }
   }
   out = out.withTag(item.tag.tag + enchList);
@@ -66,7 +70,7 @@ function unwrapJEI(wrapper as IItemStack) as IItemStack[] {
     var enchList = {} as IData;
     for enchant in wrapper.tag.delayedEnch.asList() {
       for name, level in enchant.asMap() {
-        enchList += makeIntTag(<enchantment:${name}>.makeEnchantment(level));
+        enchList += makeIntTag(<enchantment:${name}>.makeEnchantment(level), true);
       }
     }
     return item.withTag(enchList).withLore(["The superenchanted item will have these enchants"]);
