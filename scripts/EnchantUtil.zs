@@ -13,7 +13,7 @@ import mods.zenutils.StaticString;
 **/
 function makeIntTag(enchant as IEnchantment) as IData {
   return {
-    ench: [{
+    StoredEnchantments: [{
       id: enchant.definition.id,
       lvl: enchant.level
     }]
@@ -42,38 +42,40 @@ function unwrap(item as IItemStack) as IItemStack {
 
 /**
   From a superenchant_wrapper item, return a representation of the superenchanted item.
-  Because of how JEI loads, the NBT is dynamically transformed on tooltip hover.
+  Because of how JEI loads, this representation transforms only the tooltip on hover, not its NBT,
+  in order to preserve proper keybind "Show recipes" & "Show usages" functionality.
 **/
-function unwrapJEI(wrapper as IItemStack) as IItemStack {
+function unwrapJEI(wrapper as IItemStack) as IItemStack[] {
   if (wrapper.definition.id != "contenttweaker:superenchant_wrapper" || !wrapper.hasTag) {
     return null; 
   }
   var base as IItemStack = <item:${wrapper.tag.id}>.withDamage(wrapper.damage);
-  val dummyTags = {
-    ench: [{ // Add a dummy enchant for the glow, removed in transformer.
-      id: 0,
-      lvl: 1
-    }],
-    transformed: false
+  // Unique identifier for running addAdvancedTooltip.
+  val identifier = {
+    id: wrapper.tag.id,
+    delayedEnch: wrapper.tag.delayedEnch
   } as IData;
-  base = base.withTag(wrapper.tag.tag + dummyTags);
+  base = base.withTag(wrapper.tag.tag);
+  // Add a dummy enchant for the glow.
+  val dummyEnchant = <enchantment:minecraft:protection>.makeEnchantment(1);
+  base.addEnchantment(dummyEnchant);
+  base.removeTooltip(dummyEnchant.displayName);
+  var book as IItemStack = <minecraft:enchanted_book>.withTag(identifier);
   // Setup item transformer to run later.
-  val transformed = base.transformNew(function(item) {
+  var transformed = book.transformNew(function(item) {
     var enchList = {} as IData;
     for enchant in wrapper.tag.delayedEnch.asList() {
-      // A singleton map of the enchant.
       for name, level in enchant.asMap() {
         enchList += makeIntTag(<enchantment:${name}>.makeEnchantment(level));
       }
     }
-    return item.withTag(item.tag - dummyTags + enchList);
+    return item.withTag(enchList).withLore(["The superenchanted item will have these enchants"]);
   });
-  // Late execute transformer on item hover.
-  base.addAdvancedTooltip(function(item) {
+  book.addAdvancedTooltip(function(item) {
     transformed.applyNewTransform(item);
     return null;
   });
-  return base;
+  return [base, book] as IItemStack[];
 }
 
 /**
