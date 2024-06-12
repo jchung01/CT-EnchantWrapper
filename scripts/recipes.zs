@@ -1,11 +1,15 @@
 #reloadable
 
+/**
+  This is just an example script of using the wrapper in recipes;
+  You don't need to include this script.
+**/
 // OLD IMPORTS
 import crafttweaker.data.IData;
 import crafttweaker.enchantments.IEnchantmentDefinition;
 // NEW IMPORTS
-import scripts.EnchantUtil.EnchantMap;
-import scripts.EnchantWrapper.SuperEnchantedItem;
+import scripts.enchantwrapper.EnchantUtil.EnchantMap;
+import scripts.enchantwrapper.EnchantWrapper.SuperEnchantedItem;
 
 // ---- OLD WAY ----
 val enclistSword as IEnchantmentDefinition[] = [<enchantment:minecraft:sharpness>, <enchantment:cofhcore:vorpal>];

@@ -1,6 +1,6 @@
 #modloaded contenttweaker zenutils
 #loader crafttweaker
-#priority 10
+#priority 9
 #reloadable
 
 import crafttweaker.data.IData;
@@ -8,9 +8,9 @@ import crafttweaker.item.IItemStack;
 import mods.contenttweaker.ResourceLocation;
 import mods.zenutils.DataUpdateOperation.APPEND;
 import mods.zenutils.StaticString;
-import scripts.EnchantUtil;
-import scripts.EnchantUtil.EnchantMap;
-import scripts.EnchantUtil.WrapperRegistry;
+import scripts.enchantwrapper.EnchantUtil;
+import scripts.enchantwrapper.EnchantUtil.EnchantMap;
+import scripts.enchantwrapper.EnchantUtil.WrapperRegistry;
 
 /**
   This script makes a wrapper item for enchanted items. 

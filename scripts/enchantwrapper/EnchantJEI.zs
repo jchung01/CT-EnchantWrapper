@@ -5,8 +5,8 @@
 import mods.jei.JEI;
 import mods.randomtweaker.jei.IJeiPanel;
 import mods.randomtweaker.jei.IJeiUtils;
-import scripts.EnchantUtil;
-import scripts.EnchantUtil.WrapperRegistry;
+import scripts.enchantwrapper.EnchantUtil;
+import scripts.enchantwrapper.EnchantUtil.WrapperRegistry;
 
 var superenchantJEI as IJeiPanel = JEI.createJei("custom_superenchant", "Superenchants");
 superenchantJEI.setModid("MeatballCraft");

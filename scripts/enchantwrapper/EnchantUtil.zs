@@ -1,4 +1,4 @@
-#priority 9
+#priority 10
 #reloadable
 
 import crafttweaker.data.IData;
