@@ -34,12 +34,13 @@ See [example_recipes.zs](./example/example_recipes.zs) for concrete examples.
 
 ### Result
 If you did everything correctly, you should see a new ContentTweaker item with the id `contenttweaker:superenchant_wrapper` and searching its uses will show a custom JEI tab like this (using `example_recipes.zs` in this picture): ![](./example/example.png)  
-Left: The superenchant wrapper item with all the info of the item  
+Left: The superenchant wrapper item with all the info of the item:  
 <img src="./example/input.png" width="500">  
 Right: The output/superenchanted item with the associated enchants on an enchanted book (purely for visual purposes):  
 <img src="./example/output.png" width="500">  
 
-When a player crafts the wrapper item, all they need to do is **right-click** it (consumed) to receive the superenchanted item. <img src="./example/result.png" width="500">  
+When a player crafts the wrapper item, all they need to do is **right-click** it (consumed) to receive the superenchanted item.  
+<img src="./example/result.png" width="500">  
 
 ## Motive
 In Minecraft 1.12.2, enchantments are stored as numeric ids in the NBT of an item. Each world has its own mapping of ids to enchantments. When enchants are added/removed from the game (such as removing/adding mods or disabling enchants of mods in their config), the game will try to maintain its original mapping of numeric ids to enchantments.  
