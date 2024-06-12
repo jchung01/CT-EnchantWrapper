@@ -1,5 +1,5 @@
 #modloaded randomtweaker
-#priority 1
+#priority -10
 #reloadable
 
 import mods.jei.JEI;

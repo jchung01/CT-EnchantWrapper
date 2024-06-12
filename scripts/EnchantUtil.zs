@@ -1,4 +1,4 @@
-#priority 4
+#priority 9
 #reloadable
 
 import crafttweaker.data.IData;
@@ -45,27 +45,37 @@ function unwrap(item as IItemStack) as IItemStack {
 }
 
 /**
-  From a superenchant_wrapper item, return a representation of the superenchanted item.
-  Because of how JEI loads, this representation transforms only the tooltip on hover, not its NBT,
-  in order to preserve proper keybind "Show recipes" & "Show usages" functionality.
+  From a superenchant_wrapper item, return a representation of the superenchanted item, split in two items.
+  1) The actual item to be superenchanted, with all NBT data EXCEPT enchants.
+  2) An enchanted book with a list of all the enchants that will be applied to the item.
+  This two-fold representation is needed to display the correct enchants after JEI has already loaded
+  the recipe, and to preserve the usual "Show recipe/usages" functionality.
 **/
 function unwrapJEI(wrapper as IItemStack) as IItemStack[] {
   if (wrapper.definition.id != "contenttweaker:superenchant_wrapper" || !wrapper.hasTag) {
     return null; 
   }
-  var base as IItemStack = <item:${wrapper.tag.id}>.withDamage(wrapper.damage);
-  // Unique identifier for running addAdvancedTooltip.
+  var base as IItemStack = <item:${wrapper.tag.id}>
+    .withDamage(wrapper.damage)
+    .withTag(wrapper.tag.tag);
+  // Use an extra tag to make sure only this item has its tooltip removed.
+  val fromJEI = {
+    fromJEI: true
+  } as IData;
+  base = base.withTag(base.tag + fromJEI);
+  // Add a dummy enchant to the item for the glow.
+  val dummyEnchant = <enchantment:minecraft:protection>.makeEnchantment(1);
+  base.addEnchantment(dummyEnchant);
+  base.removeTooltip(dummyEnchant.displayName);
+  // Unique identifier for the book when running addAdvancedTooltip.
   val identifier = {
     id: wrapper.tag.id,
     delayedEnch: wrapper.tag.delayedEnch
   } as IData;
-  base = base.withTag(wrapper.tag.tag);
-  // Add a dummy enchant for the glow.
-  val dummyEnchant = <enchantment:minecraft:protection>.makeEnchantment(1);
-  base.addEnchantment(dummyEnchant);
-  base.removeTooltip(dummyEnchant.displayName);
   var book as IItemStack = <minecraft:enchanted_book>.withTag(identifier);
-  // Setup item transformer to run later.
+  // Setup transformer on book to run later.
+  // This transforms the book, not the item, because we want to keep recipe lookup functionality
+  // for the superenchanted item.
   var transformed = book.transformNew(function(item) {
     var enchList = {} as IData;
     for enchant in wrapper.tag.delayedEnch.asList() {
@@ -75,6 +85,7 @@ function unwrapJEI(wrapper as IItemStack) as IItemStack[] {
     }
     return item.withTag(enchList).withLore(["The superenchanted item will have these enchants"]);
   });
+  // Run the transformer on book tooltip hover.
   book.addAdvancedTooltip(function(item) {
     transformed.applyNewTransform(item);
     return null;

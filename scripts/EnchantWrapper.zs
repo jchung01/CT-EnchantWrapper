@@ -1,6 +1,6 @@
 #modloaded contenttweaker zenutils
 #loader crafttweaker
-#priority 3
+#priority 10
 #reloadable
 
 import crafttweaker.data.IData;
