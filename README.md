@@ -50,6 +50,8 @@ Here is an example of an enchanted item that is affected by this enchantment shi
 This recipe was added in `example_recipes.zs` using the format from the [example in the CT wiki](https://docs.blamejared.com/1.12/en/Vanilla/Enchantments/IEnchantmentDefinition#example) and is supposed to output a sword with Sharpness 5 and Vorpal 10, but Holding has replaced Vorpal due to the id shift.
 
 ## Notes
+- The scripts are meant to be loaded in a specific order. Any other scripts that use the wrapper scripts should have `-10 < priority < 9`, although you can change these priorities if necessary, as long as you keep the order.
+
 The JEI integration to display a custom "recipe" for these wrapper conversions is quite hacky. The hacks are necessary because JEI does not know the world-specific id mapping until the world is loaded, and we can't reload JEI (or at least shouldn't). Below are some things you may notice about the JEI integration:
 - If you add a high level enchant to the recipe, the wrapper item in JEI will have a numeric level (instead of Roman numerals) for that enchant in the tooltip. Please ignore this, it does not affect the desired outcome in any way.
 - The list of enchants in the JEI display are on an enchanted book due to limitations in how I can display the superenchanted item in JEI. Hopefully the tooltips I added are clear enough.  
