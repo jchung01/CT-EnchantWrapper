@@ -30,10 +30,10 @@ import scripts.enchantwrapper.EnchantUtil.WrapperRegistry;
   if (isNull(result)) {
     return "FAIL";
   }
+  player.give(result);
   if (!player.creative) {
     stack.shrink(1);
   }
-  player.give(result);
   return "SUCCESS";
 };
 
